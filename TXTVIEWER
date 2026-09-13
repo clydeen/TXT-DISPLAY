@@ -1,298 +1,93 @@
-local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+-- Services
+local Players = game:GetService("%50%6c%61%79%65%72%73") -- obfuscated slightly or standard? Let's keep it clean
+local PlayersService = game:GetService("Players")
+local LocalPlayer = PlayersService.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local player = Players.LocalPlayer
-local guiName = "CustomRobloxUI"
+-- Configuration (Only you can edit this text directly in the code)
+local CONFIG = {
+    MainText = "KLACEY MUYGACO",
+    SubText = "100M",
+    TextColor = Color3.fromRGB(241, 196, 15), -- Gold/Yellow matching the image
+    BackgroundColor = Color3.fromRGB(255, 255, 255) -- White box background
+}
 
--- Clean up existing GUI instance
-local targetGui = pcall(function() return CoreGui end) and CoreGui or player:WaitForChild("PlayerGui")
-if targetGui:FindFirstChild(guiName) then
-	targetGui[guiName]:Destroy()
+-- Remove existing GUI if it already exists (prevents duplicates on re-execution)
+if PlayerGui:FindFirstChild("CustomDisplayGui") then
+    PlayerGui.CustomDisplayGui:Destroy()
 end
 
--- Base ScreenGui
+-- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = guiName
+screenGui.Name = "CustomDisplayGui"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = targetGui
+screenGui.Parent = PlayerGui
 
--- State Variables
-local baseColor = Color3.fromRGB(255, 255, 255)
-local baseSize = Vector2.new(280, 360)
-local isMinimized = false
-
--- Draggable Utility Function
-local function makeDraggable(gui)
-	local dragging, dragInput, dragStart, startPos
-	gui.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = gui.Position
-		end
-	end)
-	gui.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			local delta = input.Position - dragStart
-			gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-		end
-	end)
-	gui.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = false
-		end
-	end)
-end
-
--- Main Window
+-- Create Main White Background Frame
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.fromOffset(baseSize.X, baseSize.Y)
-mainFrame.Position = UDim2.new(0.5, -baseSize.X / 2, 0.5, -baseSize.Y / 2)
-mainFrame.BackgroundColor3 = baseColor
+mainFrame.Size = UDim2.new(0, 450, 0, 250)
+mainFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
+mainFrame.BackgroundColor3 = CONFIG.BackgroundColor
 mainFrame.BorderSizePixel = 0
-mainFrame.ClipsDescendants = false
 mainFrame.Parent = screenGui
-makeDraggable(mainFrame)
 
-local frameCorner = Instance.new("UICorner")
-frameCorner.CornerRadius = UDim.new(0, 12)
-frameCorner.Parent = mainFrame
+-- Add rounded corners to the main frame
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = mainFrame
 
--- RGB Moving Animated Border
-local uiStroke = Instance.new("UIStroke")
-uiStroke.Thickness = 4
-uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-uiStroke.Parent = mainFrame
-
-local hue = 0
-RunService.RenderStepped:Connect(function(dt)
-	hue = (hue + dt * 0.3) % 1
-	uiStroke.Color = Color3.fromHSV(hue, 0.9, 1)
-end)
-
--- Title Header Bar
+-- Create Main Text Label (KLACEY MUYGACO)
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -40, 0, 35)
-titleLabel.Position = UDim2.new(0, 15, 0, 5)
+titleLabel.Name = "TitleLabel"
+titleLabel.Size = UDim2.new(1, -40, 0, 80)
+titleLabel.Position = UDim2.new(0, 20, 0, 35)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "CONTROL PANEL"
-titleLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-titleLabel.Font = Enum.Font.GothamBlack
-titleLabel.TextSize = 16
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Text = CONFIG.MainText
+titleLabel.TextColor3 = CONFIG.TextColor
+titleLabel.TextScaled = true
 titleLabel.Parent = mainFrame
 
--- Minimize Button
-local minBtn = Instance.new("TextButton")
-minBtn.Size = UDim2.new(0, 26, 0, 26)
-minBtn.Position = UDim2.new(1, -34, 0, 10)
-minBtn.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
-minBtn.Text = "-"
-minBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-minBtn.Font = Enum.Font.GothamBlack
-minBtn.TextSize = 18
-minBtn.BorderSizePixel = 0
-minBtn.Parent = mainFrame
+-- Create Sub Text Label (100M)
+local subLabel = Instance.new("TextLabel")
+subLabel.Name = "SubLabel"
+subLabel.Size = UDim2.new(1, -40, 0, 80)
+subLabel.Position = UDim2.new(0, 20, 0, 125)
+subLabel.BackgroundTransparency = 1
+subLabel.Font = Enum.Font.GothamBold
+subLabel.Text = CONFIG.SubText
+subLabel.TextColor3 = CONFIG.TextColor
+subLabel.TextScaled = true
+subLabel.Parent = mainFrame
 
-Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 6)
+-- Create Refresh Button (Small, discreet button to update the text from the CONFIG table)
+local refreshButton = Instance.new("TextButton")
+refreshButton.Name = "RefreshButton"
+refreshButton.Size = UDim2.new(0, 70, 0, 25)
+refreshButton.Position = UDim2.new(1, -75, 0, 5)
+refreshButton.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+refreshButton.BorderSizePixel = 0
+refreshButton.Font = Enum.Font.GothamMedium
+refreshButton.Text = "Refresh"
+refreshButton.TextColor3 = Color3.fromRGB(50, 50, 50)
+refreshButton.TextSize = 12
+refreshButton.Parent = mainFrame
 
--- Input Field Creator Helper
-local function createInputField(parent, pos, placeholderText)
-	local container = Instance.new("Frame")
-	container.Size = UDim2.new(1, -30, 0, 36)
-	container.Position = pos
-	container.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
-	container.BorderSizePixel = 0
-	container.Parent = parent
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 6)
+btnCorner.Parent = refreshButton
 
-	Instance.new("UICorner", container).CornerRadius = UDim.new(0, 8)
-
-	local box = Instance.new("TextBox")
-	box.Size = UDim2.new(1, -16, 1, 0)
-	box.Position = UDim2.new(0, 8, 0, 0)
-	box.BackgroundTransparency = 1
-	box.PlaceholderText = placeholderText
-	box.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
-	box.Text = ""
-	box.TextColor3 = Color3.fromRGB(0, 0, 0)
-	box.Font = Enum.Font.GothamBold
-	box.TextSize = 13
-	box.Parent = container
-
-	return box
-end
-
-local nameInput = createInputField(mainFrame, UDim2.new(0, 15, 0, 48), "Enter Name...")
-local moneyInput = createInputField(mainFrame, UDim2.new(0, 15, 0, 92), "Enter Money Amount...")
-
--- Size Scale Slider
-local sliderLabel = Instance.new("TextLabel")
-sliderLabel.Size = UDim2.new(1, -30, 0, 20)
-sliderLabel.Position = UDim2.new(0, 15, 0, 138)
-sliderLabel.BackgroundTransparency = 1
-sliderLabel.Text = "RESIZE UI"
-sliderLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-sliderLabel.Font = Enum.Font.GothamBlack
-sliderLabel.TextSize = 11
-sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
-sliderLabel.Parent = mainFrame
-
-local sliderTrack = Instance.new("Frame")
-sliderTrack.Size = UDim2.new(1, -30, 0, 8)
-sliderTrack.Position = UDim2.new(0, 15, 0, 162)
-sliderTrack.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-sliderTrack.BorderSizePixel = 0
-sliderTrack.Parent = mainFrame
-Instance.new("UICorner", sliderTrack).CornerRadius = UDim.new(1, 0)
-
-local sliderKnob = Instance.new("TextButton")
-sliderKnob.Size = UDim2.new(0, 16, 0, 16)
-sliderKnob.Position = UDim2.new(0.5, -8, 0.5, -8)
-sliderKnob.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-sliderKnob.Text = ""
-sliderKnob.Parent = sliderTrack
-Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
-
-local isSliding = false
-sliderKnob.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		isSliding = true
-	end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		isSliding = false
-	end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-	if isSliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-		local mousePos = input.Position.X
-		local trackPos = sliderTrack.AbsolutePosition.X
-		local trackWidth = sliderTrack.AbsoluteSize.X
-		local alpha = math.clamp((mousePos - trackPos) / trackWidth, 0, 1)
-
-		sliderKnob.Position = UDim2.new(alpha, -8, 0.5, -8)
-
-		local scaleFactor = 0.7 + (alpha * 0.6) -- Scale range: 0.7x to 1.3x
-		mainFrame.Size = UDim2.fromOffset(baseSize.X * scaleFactor, baseSize.Y * scaleFactor)
-	end
-end)
-
--- Color Picker (Hue Bar)
-local colorLabel = Instance.new("TextLabel")
-colorLabel.Size = UDim2.new(1, -30, 0, 20)
-colorLabel.Position = UDim2.new(0, 15, 0, 182)
-colorLabel.BackgroundTransparency = 1
-colorLabel.Text = "BASE COLOR PICKER"
-colorLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-colorLabel.Font = Enum.Font.GothamBlack
-colorLabel.TextSize = 11
-colorLabel.TextXAlignment = Enum.TextXAlignment.Left
-colorLabel.Parent = mainFrame
-
-local colorGradientBar = Instance.new("TextButton")
-colorGradientBar.Size = UDim2.new(1, -30, 0, 20)
-colorGradientBar.Position = UDim2.new(0, 15, 0, 206)
-colorGradientBar.Text = ""
-colorGradientBar.AutoButtonColor = false
-colorGradientBar.BorderSizePixel = 0
-colorGradientBar.Parent = mainFrame
-Instance.new("UICorner", colorGradientBar).CornerRadius = UDim.new(0, 6)
-
-local UIGradient = Instance.new("UIGradient")
-UIGradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
-	ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
-	ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
-	ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 255, 255)),
-	ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
-	ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
-	ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 255, 255)),
-})
-UIGradient.Parent = colorGradientBar
-
-local isSelectingColor = false
-colorGradientBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		isSelectingColor = true
-	end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		isSelectingColor = false
-	end
-end)
-
-local function updateColor(input)
-	local mousePos = input.Position.X
-	local barPos = colorGradientBar.AbsolutePosition.X
-	local barWidth = colorGradientBar.AbsoluteSize.X
-	local alpha = math.clamp((mousePos - barPos) / barWidth, 0, 1)
-
-	if alpha >= 0.95 then
-		mainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	else
-		mainFrame.BackgroundColor3 = Color3.fromHSV(alpha / 0.95, 0.6, 1)
-	end
-end
-
-colorGradientBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		updateColor(input)
-	end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-	if isSelectingColor and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-		updateColor(input)
-	end
-end)
-
--- Minimized Draggable Circle Widget
-local miniCircle = Instance.new("TextButton")
-miniCircle.Name = "MiniCircle"
-miniCircle.Size = UDim2.fromOffset(50, 50)
-miniCircle.Position = UDim2.new(0.5, -25, 0.5, -25)
-miniCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-miniCircle.Text = "UI"
-miniCircle.TextColor3 = Color3.fromRGB(0, 0, 0)
-miniCircle.Font = Enum.Font.GothamBlack
-miniCircle.TextSize = 16
-miniCircle.Visible = false
-miniCircle.Parent = screenGui
-
-Instance.new("UICorner", miniCircle).CornerRadius = UDim.new(1, 0)
-
-local miniStroke = Instance.new("UIStroke")
-miniStroke.Thickness = 3
-miniStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-miniStroke.Parent = miniCircle
-
-RunService.RenderStepped:Connect(function()
-	miniStroke.Color = uiStroke.Color
-end)
-
-makeDraggable(miniCircle)
-
--- Minimize & Restore Logic
-minBtn.MouseButton1Click:Connect(function()
-	mainFrame.Visible = false
-	miniCircle.Visible = true
-end)
-
-miniCircle.MouseButton1Click:Connect(function()
-	miniCircle.Visible = false
-	mainFrame.Visible = true
+-- Refresh functionality: updates text dynamically if you modify CONFIG and re-execute or hook it up
+refreshButton.MouseButton1Click:Connect(function()
+    titleLabel.Text = CONFIG.MainText
+    subLabel.Text = CONFIG.SubText
+    titleLabel.TextColor3 = CONFIG.TextColor
+    subLabel.TextColor3 = CONFIG.TextColor
+    mainFrame.BackgroundColor3 = CONFIG.BackgroundColor
+    
+    -- Small visual feedback on click
+    refreshButton.Text = "Updated!"
+    task.wait(1)
+    refreshButton.Text = "Refresh"
 end)
