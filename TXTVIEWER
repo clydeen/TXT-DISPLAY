@@ -9,8 +9,8 @@ local guiName = "CustomTextDisplayUI"
 
 -- Configuration (Edit your text here)
 local CONFIG = {
-    MainText = "KLACEY MUYGACO",
-    SubText = "100M",
+    MainText = "KLACEY PILOT",
+    SubText = "1B",
     TextColor = Color3.fromRGB(241, 196, 15), -- Gold/Yellow
     BackgroundColor = Color3.fromRGB(255, 255, 255) -- White background
 }
