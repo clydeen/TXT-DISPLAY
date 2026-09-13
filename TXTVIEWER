@@ -1,8 +1,7 @@
 -- Services
-local Players = game:GetService("%50%6c%61%79%65%72%73") -- obfuscated slightly or standard? Let's keep it clean
-local PlayersService = game:GetService("Players")
-local LocalPlayer = PlayersService.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
 -- Configuration (Only you can edit this text directly in the code)
 local CONFIG = {
@@ -12,16 +11,32 @@ local CONFIG = {
     BackgroundColor = Color3.fromRGB(255, 255, 255) -- White box background
 }
 
--- Remove existing GUI if it already exists (prevents duplicates on re-execution)
-if PlayerGui:FindFirstChild("CustomDisplayGui") then
-    PlayerGui.CustomDisplayGui:Destroy()
+-- Use CoreGui if available (Synapse, Krnl, Delta, Arceus X, etc.), otherwise PlayerGui
+local parentTarget = CoreGui
+local success, err = pcall(function()
+    if not CoreGui:FindFirstChild("CoreGui") then
+        -- Test if we have permission to parent to CoreGui
+        local test = Instance.new("Folder")
+        test.Parent = CoreGui
+        test:Destroy()
+    end
+end)
+
+if not success then
+    parentTarget = LocalPlayer:WaitForChild("PlayerGui")
+end
+
+-- Remove existing GUI if it already exists (prevents duplicates)
+if parentTarget:FindFirstChild("CustomDisplayGui") then
+    parentTarget.CustomDisplayGui:Destroy()
 end
 
 -- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CustomDisplayGui"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = PlayerGui
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = parentTarget
 
 -- Create Main White Background Frame
 local mainFrame = Instance.new("Frame")
@@ -30,6 +45,8 @@ mainFrame.Size = UDim2.new(0, 450, 0, 250)
 mainFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
 mainFrame.BackgroundColor3 = CONFIG.BackgroundColor
 mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true -- Allows you to drag the box around on mobile/PC
 mainFrame.Parent = screenGui
 
 -- Add rounded corners to the main frame
@@ -61,7 +78,7 @@ subLabel.TextColor3 = CONFIG.TextColor
 subLabel.TextScaled = true
 subLabel.Parent = mainFrame
 
--- Create Refresh Button (Small, discreet button to update the text from the CONFIG table)
+-- Create Refresh Button (Small button to reload/update text from CONFIG)
 local refreshButton = Instance.new("TextButton")
 refreshButton.Name = "RefreshButton"
 refreshButton.Size = UDim2.new(0, 70, 0, 25)
@@ -78,7 +95,7 @@ local btnCorner = Instance.new("UICorner")
 btnCorner.CornerRadius = UDim.new(0, 6)
 btnCorner.Parent = refreshButton
 
--- Refresh functionality: updates text dynamically if you modify CONFIG and re-execute or hook it up
+-- Refresh functionality
 refreshButton.MouseButton1Click:Connect(function()
     titleLabel.Text = CONFIG.MainText
     subLabel.Text = CONFIG.SubText
@@ -86,7 +103,6 @@ refreshButton.MouseButton1Click:Connect(function()
     subLabel.TextColor3 = CONFIG.TextColor
     mainFrame.BackgroundColor3 = CONFIG.BackgroundColor
     
-    -- Small visual feedback on click
     refreshButton.Text = "Updated!"
     task.wait(1)
     refreshButton.Text = "Refresh"
