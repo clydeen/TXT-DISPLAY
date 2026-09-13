@@ -1,109 +1,101 @@
 -- Services
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 -- Configuration (Only you can edit this text directly in the code)
 local CONFIG = {
     MainText = "KLACEY MUYGACO",
     SubText = "100M",
-    TextColor = Color3.fromRGB(241, 196, 15), -- Gold/Yellow matching the image
-    BackgroundColor = Color3.fromRGB(255, 255, 255) -- White box background
+    TextColor = Color3.fromRGB(241, 196, 15),
+    BackgroundColor = Color3.fromRGB(255, 255, 255)
 }
 
--- Use CoreGui if available (Synapse, Krnl, Delta, Arceus X, etc.), otherwise PlayerGui
-local parentTarget = CoreGui
-local success, err = pcall(function()
-    if not CoreGui:FindFirstChild("CoreGui") then
-        -- Test if we have permission to parent to CoreGui
-        local test = Instance.new("Folder")
-        test.Parent = CoreGui
-        test:Destroy()
+-- Function to safely build and parent the GUI
+local function createGui(targetParent)
+    if targetParent:FindFirstChild("CustomDisplayGui") then
+        targetParent.CustomDisplayGui:Destroy()
     end
-end)
 
-if not success then
-    parentTarget = LocalPlayer:WaitForChild("PlayerGui")
-end
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "CustomDisplayGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.DisplayOrder = 999999
+    screenGui.Parent = targetParent
 
--- Remove existing GUI if it already exists (prevents duplicates)
-if parentTarget:FindFirstChild("CustomDisplayGui") then
-    parentTarget.CustomDisplayGui:Destroy()
-end
-
--- Create ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CustomDisplayGui"
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Parent = parentTarget
-
--- Create Main White Background Frame
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 450, 0, 250)
-mainFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
-mainFrame.BackgroundColor3 = CONFIG.BackgroundColor
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true -- Allows you to drag the box around on mobile/PC
-mainFrame.Parent = screenGui
-
--- Add rounded corners to the main frame
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 12)
-uiCorner.Parent = mainFrame
-
--- Create Main Text Label (KLACEY MUYGACO)
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Name = "TitleLabel"
-titleLabel.Size = UDim2.new(1, -40, 0, 80)
-titleLabel.Position = UDim2.new(0, 20, 0, 35)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.Text = CONFIG.MainText
-titleLabel.TextColor3 = CONFIG.TextColor
-titleLabel.TextScaled = true
-titleLabel.Parent = mainFrame
-
--- Create Sub Text Label (100M)
-local subLabel = Instance.new("TextLabel")
-subLabel.Name = "SubLabel"
-subLabel.Size = UDim2.new(1, -40, 0, 80)
-subLabel.Position = UDim2.new(0, 20, 0, 125)
-subLabel.BackgroundTransparency = 1
-subLabel.Font = Enum.Font.GothamBold
-subLabel.Text = CONFIG.SubText
-subLabel.TextColor3 = CONFIG.TextColor
-subLabel.TextScaled = true
-subLabel.Parent = mainFrame
-
--- Create Refresh Button (Small button to reload/update text from CONFIG)
-local refreshButton = Instance.new("TextButton")
-refreshButton.Name = "RefreshButton"
-refreshButton.Size = UDim2.new(0, 70, 0, 25)
-refreshButton.Position = UDim2.new(1, -75, 0, 5)
-refreshButton.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
-refreshButton.BorderSizePixel = 0
-refreshButton.Font = Enum.Font.GothamMedium
-refreshButton.Text = "Refresh"
-refreshButton.TextColor3 = Color3.fromRGB(50, 50, 50)
-refreshButton.TextSize = 12
-refreshButton.Parent = mainFrame
-
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 6)
-btnCorner.Parent = refreshButton
-
--- Refresh functionality
-refreshButton.MouseButton1Click:Connect(function()
-    titleLabel.Text = CONFIG.MainText
-    subLabel.Text = CONFIG.SubText
-    titleLabel.TextColor3 = CONFIG.TextColor
-    subLabel.TextColor3 = CONFIG.TextColor
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = UDim2.new(0, 450, 0, 250)
+    mainFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
     mainFrame.BackgroundColor3 = CONFIG.BackgroundColor
-    
-    refreshButton.Text = "Updated!"
-    task.wait(1)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    mainFrame.Parent = screenGui
+
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 12)
+    uiCorner.Parent = mainFrame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "TitleLabel"
+    titleLabel.Size = UDim2.new(1, -40, 0, 80)
+    titleLabel.Position = UDim2.new(0, 20, 0, 35)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Text = CONFIG.MainText
+    titleLabel.TextColor3 = CONFIG.TextColor
+    titleLabel.TextScaled = true
+    titleLabel.Parent = mainFrame
+
+    local subLabel = Instance.new("TextLabel")
+    subLabel.Name = "SubLabel"
+    subLabel.Size = UDim2.new(1, -40, 0, 80)
+    subLabel.Position = UDim2.new(0, 20, 0, 125)
+    subLabel.BackgroundTransparency = 1
+    subLabel.Font = Enum.Font.GothamBold
+    subLabel.Text = CONFIG.SubText
+    subLabel.TextColor3 = CONFIG.TextColor
+    subLabel.TextScaled = true
+    subLabel.Parent = mainFrame
+
+    local refreshButton = Instance.new("TextButton")
+    refreshButton.Name = "RefreshButton"
+    refreshButton.Size = UDim2.new(0, 70, 0, 25)
+    refreshButton.Position = UDim2.new(1, -75, 0, 5)
+    refreshButton.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+    refreshButton.BorderSizePixel = 0
+    refreshButton.Font = Enum.Font.GothamMedium
     refreshButton.Text = "Refresh"
+    refreshButton.TextColor3 = Color3.fromRGB(50, 50, 50)
+    refreshButton.TextSize = 12
+    refreshButton.Parent = mainFrame
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = refreshButton
+
+    refreshButton.MouseButton1Click:Connect(function()
+        titleLabel.Text = CONFIG.MainText
+        subLabel.Text = CONFIG.SubText
+        titleLabel.TextColor3 = CONFIG.TextColor
+        subLabel.TextColor3 = CONFIG.TextColor
+        mainFrame.BackgroundColor3 = CONFIG.BackgroundColor
+        
+        refreshButton.Text = "Updated!"
+        task.wait(1)
+        refreshButton.Text = "Refresh"
+    end)
+end
+
+-- Try parenting to CoreGui first, fallback to PlayerGui if restricted or nil
+local success = pcall(function()
+    createGui(CoreGui)
 end)
+
+if not success or not CoreGui:FindFirstChild("CustomDisplayGui") then
+    pcall(function()
+        createGui(LocalPlayer:WaitForChild("PlayerGui"))
+    end)
+end
